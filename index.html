@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFL Teams Info</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 600px; margin: auto; }
+        .dropdown-row { display: flex; align-items: center; gap: 10px; }
+        #submitBtn { display: none; }
+        .team-info { margin-top: 30px; border: 1px solid #ccc; padding: 20px; border-radius: 8px; background: #f9f9f9; }
+        .team-logo { max-width: 120px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Select an NFL Team</h2>
+        <div class="dropdown-row">
+            <select id="teamDropdown">
+                <option value="">-- Choose a team --</option>
+            </select>
+            <button id="submitBtn">Submit</button>
+        </div>
+        <div id="teamInfo" class="team-info" style="display:none;"></div>
+    </div>
+    <script>
+        // Team data from CSV
+        const teams = [
+            {team_abbr:"ARI",team_name:"Arizona Cardinals",team_division:"NFC West",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/ari.png"},
+            {team_abbr:"ATL",team_name:"Atlanta Falcons",team_division:"NFC South",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/atl.png"},
+            {team_abbr:"BAL",team_name:"Baltimore Ravens",team_division:"AFC North",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/bal.png"},
+            {team_abbr:"BUF",team_name:"Buffalo Bills",team_division:"AFC East",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/buf.png"},
+            {team_abbr:"CAR",team_name:"Carolina Panthers",team_division:"NFC South",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500-dark/car.png"},
+            {team_abbr:"CHI",team_name:"Chicago Bears",team_division:"NFC North",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/chi.png"},
+            {team_abbr:"CIN",team_name:"Cincinnati Bengals",team_division:"AFC North",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/cin.png"},
+            {team_abbr:"CLE",team_name:"Cleveland Browns",team_division:"AFC North",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/cle.png"},
+            {team_abbr:"DAL",team_name:"Dallas Cowboys",team_division:"NFC East",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/dal.png"},
+            {team_abbr:"DEN",team_name:"Denver Broncos",team_division:"AFC West",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/den.png"},
+            {team_abbr:"DET",team_name:"Detroit Lions",team_division:"NFC North",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/det.png"},
+            {team_abbr:"GB",team_name:"Green Bay Packers",team_division:"NFC North",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/gb.png"},
+            {team_abbr:"HOU",team_name:"Houston Texans",team_division:"AFC South",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/hou.png"},
+            {team_abbr:"IND",team_name:"Indianapolis Colts",team_division:"AFC South",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/ind.png"},
+            {team_abbr:"JAX",team_name:"Jacksonville Jaguars",team_division:"AFC South",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/jax.png"},
+            {team_abbr:"KC",team_name:"Kansas City Chiefs",team_division:"AFC West",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/kc.png"},
+            {team_abbr:"LA",team_name:"Los Angeles Rams",team_division:"NFC West",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/lar.png"},
+            {team_abbr:"LAC",team_name:"Los Angeles Chargers",team_division:"AFC West",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/lac.png"},
+            {team_abbr:"LV",team_name:"Las Vegas Raiders",team_division:"AFC West",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/lv.png"},
+            {team_abbr:"MIA",team_name:"Miami Dolphins",team_division:"AFC East",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/mia.png"},
+            {team_abbr:"MIN",team_name:"Minnesota Vikings",team_division:"NFC North",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/min.png"},
+            {team_abbr:"NE",team_name:"New England Patriots",team_division:"AFC East",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/ne.png"},
+            {team_abbr:"NO",team_name:"New Orleans Saints",team_division:"NFC South",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/no.png"},
+            {team_abbr:"NYG",team_name:"New York Giants",team_division:"NFC East",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/nyg.png"},
+            {team_abbr:"NYJ",team_name:"New York Jets",team_division:"AFC East",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/nyj.png"},
+            {team_abbr:"PHI",team_name:"Philadelphia Eagles",team_division:"NFC East",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/phi.png"},
+            {team_abbr:"PIT",team_name:"Pittsburgh Steelers",team_division:"AFC North",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/pit.png"},
+            {team_abbr:"SEA",team_name:"Seattle Seahawks",team_division:"NFC West",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/sea.png"},
+            {team_abbr:"SF",team_name:"San Francisco 49ers",team_division:"NFC West",team_logo_espn:"https://a.espncdn.com/i/teamlogos/nfl/500/sf.png"}
+        ];
+
+        // Populate dropdown
+        const dropdown = document.getElementById('teamDropdown');
+        teams.forEach(team => {
+            const option = document.createElement('option');
+            option.value = team.team_abbr;
+            option.textContent = team.team_name;
+            dropdown.appendChild(option);
+        });
+
+        // Show submit button when a team is selected
+        dropdown.addEventListener('change', function() {
+            document.getElementById('submitBtn').style.display = dropdown.value ? 'inline-block' : 'none';
+            document.getElementById('teamInfo').style.display = 'none';
+        });
+
+        // Show team info on submit
+        document.getElementById('submitBtn').addEventListener('click', function() {
+            const selectedAbbr = dropdown.value;
+            const team = teams.find(t => t.team_abbr === selectedAbbr);
+            if (team) {
+                document.getElementById('teamInfo').innerHTML = `
+                    <img class="team-logo" src="${team.team_logo_espn}" alt="${team.team_name} logo" />
+                    <h3>${team.team_name}</h3>
+                    <p><strong>Division:</strong> ${team.team_division}</p>
+                    <p><strong>Abbreviation:</strong> ${team.team_abbr}</p>
+                `;
+                document.getElementById('teamInfo').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
